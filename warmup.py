@@ -9,12 +9,7 @@ sys.path.insert(0, '/app/CosyVoice/third_party/Matcha-TTS')
 from cosyvoice.cli.cosyvoice import CosyVoice3
 
 print('Loading model for warmup...')
-model = CosyVoice3(
-    '/app/pretrained_models/Fun-CosyVoice3-0.5B',
-    load_jit=False,
-    load_trt=False,
-    fp16=True
-)
+model = CosyVoice3('/app/pretrained_models/Fun-CosyVoice3-0.5B')
 print(f'Model loaded, sample rate: {model.sample_rate}')
 
 # Quick inference to warm up all components
