@@ -248,26 +248,41 @@ def synthesize_tts(
                 break
 
         else:
-            # Default SFT mode (use built-in voice)
-            # inference_sft uses pre-trained speaker IDs from the model
-            # Available speakers depend on model, common ones: "中文女", "中文男", "英文女", "英文男"
-            logger.info("Mode: SFT (default voice)")
+            # No prompt audio provided - check for built-in speakers
+            logger.info("Mode: checking for built-in speakers")
 
-            # Get available speakers from model
-            available_speakers = getattr(cosyvoice, 'list_avaliable_spks', lambda: [])()
-            logger.info(f"Available speakers: {available_speakers}")
+            # Try to get available speakers (method may be misspelled in CosyVoice)
+            available_speakers = []
+            for method_name in ['list_available_spks', 'list_avaliable_spks']:
+                method = getattr(cosyvoice, method_name, None)
+                if method and callable(method):
+                    try:
+                        available_speakers = method()
+                        logger.info(f"Found speakers via {method_name}: {available_speakers}")
+                        break
+                    except Exception as e:
+                        logger.warning(f"{method_name} failed: {e}")
 
-            # Select first available speaker or use default
-            spk_id = available_speakers[0] if available_speakers else "中文女"
-            logger.info(f"Using speaker: {spk_id}")
+            if available_speakers:
+                # Use first available speaker with inference_sft
+                spk_id = available_speakers[0]
+                logger.info(f"Using built-in speaker: {spk_id}")
 
-            for output in cosyvoice.inference_sft(
-                tts_text=text,
-                spk_id=spk_id,
-                stream=False,
-            ):
-                audio_output = output['tts_speech']
-                break
+                for output in cosyvoice.inference_sft(
+                    tts_text=text,
+                    spk_id=spk_id,
+                    stream=False,
+                ):
+                    audio_output = output['tts_speech']
+                    break
+            else:
+                # No built-in speakers - this is a zero-shot model
+                # Reference audio (prompt_wav) is required
+                logger.error("No built-in speakers available. prompt_wav is required for this model.")
+                raise ValueError(
+                    "This model requires reference audio for voice synthesis. "
+                    "Please provide 'prompt_wav' (base64 encoded WAV) and optionally 'prompt_text'."
+                )
 
     # Run inference with proper temp file cleanup
     if prompt_audio_bytes:
