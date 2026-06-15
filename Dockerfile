@@ -2,7 +2,7 @@
 # Model: FunAudioLLM/Fun-CosyVoice3-0.5B-2512
 # Supports Blackwell GPUs (sm_120) with PyTorch 2.6+
 
-FROM runpod/pytorch:2.6.0-py3.11-cuda12.4.1-devel-ubuntu22.04
+FROM runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
