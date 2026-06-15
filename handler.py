@@ -58,6 +58,9 @@ MODEL_SAMPLE_RATE = 22050   # CosyVoice native rate (will be updated from model)
 MAX_TEXT_LENGTH = 5000  # CosyVoice model limit
 MAX_PROMPT_AUDIO_SIZE = 10 * 1024 * 1024  # 10 MB
 
+# Default voice for when no prompt_wav is provided
+DEFAULT_VOICE_PATH = Path("/app/default_voice.wav")
+
 # Global model instance
 cosyvoice = None
 
@@ -276,13 +279,28 @@ def synthesize_tts(
                     audio_output = output['tts_speech']
                     break
             else:
-                # No built-in speakers - this is a zero-shot model
-                # Reference audio (prompt_wav) is required
-                logger.error("No built-in speakers available. prompt_wav is required for this model.")
-                raise ValueError(
-                    "This model requires reference audio for voice synthesis. "
-                    "Please provide 'prompt_wav' (base64 encoded WAV) and optionally 'prompt_text'."
-                )
+                # No built-in speakers - use default voice from Docker image
+                if DEFAULT_VOICE_PATH.exists():
+                    logger.info(f"Using default voice: {DEFAULT_VOICE_PATH}")
+
+                    # Use cross-lingual mode with default voice
+                    tts_text = text
+                    if not text.startswith("<|"):
+                        tts_text = f"<|ru|>{text}"
+
+                    for output in cosyvoice.inference_cross_lingual(
+                        tts_text=tts_text,
+                        prompt_wav=str(DEFAULT_VOICE_PATH),
+                        stream=False,
+                    ):
+                        audio_output = output['tts_speech']
+                        break
+                else:
+                    logger.error("No built-in speakers and no default voice available.")
+                    raise ValueError(
+                        "No default voice configured. "
+                        "Please provide 'prompt_wav' (base64 encoded WAV) for voice cloning."
+                    )
 
     # Run inference with proper temp file cleanup
     if prompt_audio_bytes:

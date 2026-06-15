@@ -69,8 +69,9 @@ RUN hf download FunAudioLLM/CosyVoice-ttsfrd \
 # Must install matching torchvision to avoid "operator torchvision::nms does not exist"
 RUN pip install --no-cache-dir torch==2.6.0 torchaudio==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cu124
 
-# Copy handler
+# Copy handler and default voice
 COPY handler.py /app/handler.py
+COPY default_voice.wav /app/default_voice.wav
 
 # Skip warmup during build - model loads on first request
 # This avoids torch version conflicts and speeds up builds
