@@ -14,8 +14,7 @@ ENV TORCH_HOME=/app/torch_cache
 ENV PIP_DEFAULT_TIMEOUT=600
 ENV PIP_RETRIES=5
 
-# HuggingFace settings for faster downloads
-ENV HF_HUB_ENABLE_HF_TRANSFER=1
+# Note: HF_HUB_ENABLE_HF_TRANSFER removed - causes issues with newer huggingface_hub
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
