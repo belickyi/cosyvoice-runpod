@@ -63,12 +63,14 @@ RUN hf download FunAudioLLM/CosyVoice-ttsfrd \
     --local-dir /app/pretrained_models/CosyVoice-ttsfrd \
     || echo "ttsfrd download failed, will use wetext"
 
-# Copy handler and warmup script
-COPY handler.py /app/handler.py
-COPY warmup.py /app/warmup.py
+# Fix torch version conflict: CosyVoice installs 2.3.1, but torchvision needs 2.4.1
+RUN pip install --no-cache-dir torch==2.4.1 torchaudio==2.4.1 --index-url https://download.pytorch.org/whl/cu124
 
-# Warmup: Load model and run test inference to speed up cold start
-RUN python3 /app/warmup.py
+# Copy handler
+COPY handler.py /app/handler.py
+
+# Skip warmup during build - model loads on first request
+# This avoids torch version conflicts and speeds up builds
 
 # RunPod handler entrypoint
 CMD ["python3", "-u", "/app/handler.py"]
