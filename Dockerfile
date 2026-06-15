@@ -14,6 +14,9 @@ ENV TORCH_HOME=/app/torch_cache
 ENV PIP_DEFAULT_TIMEOUT=600
 ENV PIP_RETRIES=5
 
+# HuggingFace settings for faster downloads
+ENV HF_HUB_ENABLE_HF_TRANSFER=1
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
@@ -36,6 +39,9 @@ RUN git clone --recursive https://github.com/FunAudioLLM/CosyVoice.git && \
     cd CosyVoice && \
     git submodule update --init --recursive
 
+# Install setuptools for pkg_resources (required by openai-whisper)
+RUN pip install --no-cache-dir setuptools
+
 # Install CosyVoice specific dependencies
 RUN cd /app/CosyVoice && \
     pip install --no-cache-dir -r requirements.txt || true
@@ -43,17 +49,15 @@ RUN cd /app/CosyVoice && \
 # Create cache directories
 RUN mkdir -p /app/hf_cache /app/torch_cache /app/pretrained_models
 
-# Download model from HuggingFace using CLI (more memory efficient)
-# Split into separate commands to reduce peak memory usage
-RUN huggingface-cli download FunAudioLLM/Fun-CosyVoice3-0.5B-2512 \
+# Download model from HuggingFace using new CLI (hf command)
+# huggingface-cli is deprecated, use 'hf' instead
+RUN hf download FunAudioLLM/Fun-CosyVoice3-0.5B-2512 \
     --local-dir /app/pretrained_models/Fun-CosyVoice3-0.5B \
-    --local-dir-use-symlinks False \
     && echo "Model downloaded successfully"
 
 # Download ttsfrd for text normalization (optional but recommended)
-RUN huggingface-cli download FunAudioLLM/CosyVoice-ttsfrd \
+RUN hf download FunAudioLLM/CosyVoice-ttsfrd \
     --local-dir /app/pretrained_models/CosyVoice-ttsfrd \
-    --local-dir-use-symlinks False \
     || echo "ttsfrd download failed, will use wetext"
 
 # Copy handler last (changes most often)
