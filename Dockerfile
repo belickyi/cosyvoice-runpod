@@ -42,13 +42,13 @@ RUN git clone --recursive https://github.com/FunAudioLLM/CosyVoice.git && \
 # Install setuptools for pkg_resources (required by openai-whisper)
 RUN pip install --no-cache-dir setuptools
 
-# Install critical CosyVoice dependencies that may fail in requirements.txt
-# diffusers is required for flow matching
-RUN pip install --no-cache-dir diffusers==0.29.0
+# Install openai-whisper separately with --no-build-isolation to use system setuptools
+# This fixes "No module named 'pkg_resources'" error
+RUN pip install --no-cache-dir --no-build-isolation openai-whisper==20231117
 
-# Install CosyVoice specific dependencies (some may fail, that's ok)
+# Install CosyVoice specific dependencies
 RUN cd /app/CosyVoice && \
-    pip install --no-cache-dir -r requirements.txt || true
+    pip install --no-cache-dir -r requirements.txt
 
 # Create cache directories
 RUN mkdir -p /app/hf_cache /app/torch_cache /app/pretrained_models
