@@ -94,13 +94,8 @@ def load_model():
     try:
         from cosyvoice.cli.cosyvoice import CosyVoice3
 
-        # Load model
-        cosyvoice = CosyVoice3(
-            str(MODEL_DIR),
-            load_jit=False,
-            load_trt=False,
-            fp16=True,  # Use FP16 for faster inference
-        )
+        # Load model (CosyVoice3 API changed - no longer accepts load_jit/load_trt/fp16)
+        cosyvoice = CosyVoice3(str(MODEL_DIR))
 
         MODEL_SAMPLE_RATE = cosyvoice.sample_rate
         logger.info(f"Model loaded successfully")
