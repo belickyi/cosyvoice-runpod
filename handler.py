@@ -247,33 +247,23 @@ def synthesize_tts(
                 audio_output = output['tts_speech']
                 break
 
-        elif instruct_text:
-            # Instruct mode
-            logger.info("Mode: instruct")
-
-            # Format instruct text
-            formatted_instruct = instruct_text
-            if not instruct_text.endswith("<|endofprompt|>"):
-                formatted_instruct = f"You are a helpful assistant. {instruct_text}<|endofprompt|>"
-
-            for output in cosyvoice.inference_instruct2(
-                tts_text=text,
-                instruct_text=formatted_instruct,
-                prompt_wav=None,
-                stream=False,
-            ):
-                audio_output = output['tts_speech']
-                break
-
         else:
             # Default SFT mode (use built-in voice)
+            # inference_sft uses pre-trained speaker IDs from the model
+            # Available speakers depend on model, common ones: "中文女", "中文男", "英文女", "英文男"
             logger.info("Mode: SFT (default voice)")
 
-            # Try instruct mode first as it doesn't need prompt audio
-            for output in cosyvoice.inference_instruct2(
+            # Get available speakers from model
+            available_speakers = getattr(cosyvoice, 'list_avaliable_spks', lambda: [])()
+            logger.info(f"Available speakers: {available_speakers}")
+
+            # Select first available speaker or use default
+            spk_id = available_speakers[0] if available_speakers else "中文女"
+            logger.info(f"Using speaker: {spk_id}")
+
+            for output in cosyvoice.inference_sft(
                 tts_text=text,
-                instruct_text="You are a helpful assistant. Speak in Russian.<|endofprompt|>",
-                prompt_wav=None,
+                spk_id=spk_id,
                 stream=False,
             ):
                 audio_output = output['tts_speech']
