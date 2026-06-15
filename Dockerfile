@@ -42,7 +42,11 @@ RUN git clone --recursive https://github.com/FunAudioLLM/CosyVoice.git && \
 # Install setuptools for pkg_resources (required by openai-whisper)
 RUN pip install --no-cache-dir setuptools
 
-# Install CosyVoice specific dependencies
+# Install critical CosyVoice dependencies that may fail in requirements.txt
+# diffusers is required for flow matching
+RUN pip install --no-cache-dir diffusers==0.29.0
+
+# Install CosyVoice specific dependencies (some may fail, that's ok)
 RUN cd /app/CosyVoice && \
     pip install --no-cache-dir -r requirements.txt || true
 
