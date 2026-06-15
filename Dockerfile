@@ -66,7 +66,8 @@ RUN hf download FunAudioLLM/CosyVoice-ttsfrd \
 
 # Fix torch version conflict: CosyVoice installs older torch
 # PyTorch 2.6.0 supports Blackwell GPUs (sm_120)
-RUN pip install --no-cache-dir torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu124
+# Must install matching torchvision to avoid "operator torchvision::nms does not exist"
+RUN pip install --no-cache-dir torch==2.6.0 torchaudio==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cu124
 
 # Copy handler
 COPY handler.py /app/handler.py
