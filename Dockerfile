@@ -60,23 +60,12 @@ RUN hf download FunAudioLLM/CosyVoice-ttsfrd \
     --local-dir /app/pretrained_models/CosyVoice-ttsfrd \
     || echo "ttsfrd download failed, will use wetext"
 
-# Copy handler last (changes most often)
+# Copy handler and warmup script
 COPY handler.py /app/handler.py
+COPY warmup.py /app/warmup.py
 
 # Warmup: Load model and run test inference to speed up cold start
-RUN python3 -c "\
-import sys; \
-sys.path.insert(0, '/app/CosyVoice'); \
-sys.path.insert(0, '/app/CosyVoice/third_party/Matcha-TTS'); \
-from cosyvoice.cli.cosyvoice import CosyVoice3; \
-print('Loading model for warmup...'); \
-model = CosyVoice3('/app/pretrained_models/Fun-CosyVoice3-0.5B', load_jit=False, load_trt=False, fp16=True); \
-print(f'Model loaded, sample rate: {model.sample_rate}'); \
-# Quick inference to warm up all components
-for output in model.inference_instruct2(tts_text='Test', instruct_text='You are a helpful assistant.<|endofprompt|>', prompt_wav=None, stream=False): \
-    print(f'Warmup inference: {len(output[\"tts_speech\"])} samples'); \
-    break; \
-print('Warmup complete')"
+RUN python3 /app/warmup.py
 
 # RunPod handler entrypoint
 CMD ["python3", "-u", "/app/handler.py"]
