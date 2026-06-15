@@ -1,7 +1,8 @@
 # CosyVoice3 TTS RunPod Serverless Handler
 # Model: FunAudioLLM/Fun-CosyVoice3-0.5B-2512
+# Supports Blackwell GPUs (sm_120) with PyTorch 2.6+
 
-FROM runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
+FROM runpod/pytorch:2.6.0-py3.11-cuda12.4.1-devel-ubuntu22.04
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
@@ -63,8 +64,9 @@ RUN hf download FunAudioLLM/CosyVoice-ttsfrd \
     --local-dir /app/pretrained_models/CosyVoice-ttsfrd \
     || echo "ttsfrd download failed, will use wetext"
 
-# Fix torch version conflict: CosyVoice installs 2.3.1, but torchvision needs 2.4.1
-RUN pip install --no-cache-dir torch==2.4.1 torchaudio==2.4.1 --index-url https://download.pytorch.org/whl/cu124
+# Fix torch version conflict: CosyVoice installs older torch
+# PyTorch 2.6.0 supports Blackwell GPUs (sm_120)
+RUN pip install --no-cache-dir torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu124
 
 # Copy handler
 COPY handler.py /app/handler.py
