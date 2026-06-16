@@ -283,7 +283,8 @@ def synthesize_tts(
             else:
                 # No built-in speakers - use default voice from Docker image
                 if DEFAULT_VOICE_PATH.exists():
-                    logger.info(f"Using default voice: {DEFAULT_VOICE_PATH}")
+                    file_size = DEFAULT_VOICE_PATH.stat().st_size
+                    logger.info(f"Using default voice: {DEFAULT_VOICE_PATH} (size: {file_size} bytes)")
 
                     # Use cross-lingual mode - doesn't require exact transcript
                     # Add Russian language tag
