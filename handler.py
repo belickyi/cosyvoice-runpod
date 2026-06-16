@@ -285,10 +285,14 @@ def synthesize_tts(
                 if DEFAULT_VOICE_PATH.exists():
                     logger.info(f"Using default voice: {DEFAULT_VOICE_PATH}")
 
-                    # Use zero-shot mode with default voice and prompt text
-                    for output in cosyvoice.inference_zero_shot(
-                        tts_text=text,
-                        prompt_text=DEFAULT_PROMPT_TEXT,
+                    # Use cross-lingual mode - doesn't require exact transcript
+                    # Add Russian language tag
+                    tts_text = text
+                    if not text.startswith("<|"):
+                        tts_text = f"<|ru|>{text}"
+
+                    for output in cosyvoice.inference_cross_lingual(
+                        tts_text=tts_text,
                         prompt_wav=str(DEFAULT_VOICE_PATH),
                         stream=False,
                     ):
