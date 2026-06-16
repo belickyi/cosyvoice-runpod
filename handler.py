@@ -286,6 +286,13 @@ def synthesize_tts(
                     file_size = DEFAULT_VOICE_PATH.stat().st_size
                     logger.info(f"Using default voice: {DEFAULT_VOICE_PATH} (size: {file_size} bytes)")
 
+                    # Debug: verify audio file is readable
+                    try:
+                        debug_audio, debug_sr = torchaudio.load(str(DEFAULT_VOICE_PATH))
+                        logger.info(f"Default voice loaded: shape={debug_audio.shape}, sr={debug_sr}, duration={debug_audio.shape[1]/debug_sr:.2f}s")
+                    except Exception as e:
+                        logger.error(f"Failed to load default voice: {e}")
+
                     # Use cross-lingual mode - doesn't require exact transcript
                     # Add Russian language tag
                     tts_text = text
