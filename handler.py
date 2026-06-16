@@ -239,10 +239,8 @@ def synthesize_tts(
             # Cross-lingual (no prompt_text needed)
             logger.info("Mode: cross-lingual")
 
-            # Add language tag for Russian
-            tts_text = text
-            if not text.startswith("<|"):
-                tts_text = f"<|ru|>{text}"
+            # CosyVoice3 requires <|endofprompt|> token
+            tts_text = f"<|endofprompt|>{text}"
 
             for output in cosyvoice.inference_cross_lingual(
                 tts_text=tts_text,
@@ -294,10 +292,8 @@ def synthesize_tts(
                         logger.error(f"Failed to load default voice: {e}")
 
                     # Use cross-lingual mode - doesn't require exact transcript
-                    # Add Russian language tag
-                    tts_text = text
-                    if not text.startswith("<|"):
-                        tts_text = f"<|ru|>{text}"
+                    # CosyVoice3 requires <|endofprompt|> token
+                    tts_text = f"<|endofprompt|>{text}"
 
                     for output in cosyvoice.inference_cross_lingual(
                         tts_text=tts_text,
