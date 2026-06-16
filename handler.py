@@ -60,6 +60,8 @@ MAX_PROMPT_AUDIO_SIZE = 10 * 1024 * 1024  # 10 MB
 
 # Default voice for when no prompt_wav is provided
 DEFAULT_VOICE_PATH = Path("/app/default_voice.wav")
+# Default prompt text matching the voice sample (Russian male voice)
+DEFAULT_PROMPT_TEXT = "Привет, это тестовое сообщение для голосового синтеза."
 
 # Global model instance
 cosyvoice = None
@@ -283,13 +285,10 @@ def synthesize_tts(
                 if DEFAULT_VOICE_PATH.exists():
                     logger.info(f"Using default voice: {DEFAULT_VOICE_PATH}")
 
-                    # Use cross-lingual mode with default voice
-                    tts_text = text
-                    if not text.startswith("<|"):
-                        tts_text = f"<|ru|>{text}"
-
-                    for output in cosyvoice.inference_cross_lingual(
-                        tts_text=tts_text,
+                    # Use zero-shot mode with default voice and prompt text
+                    for output in cosyvoice.inference_zero_shot(
+                        tts_text=text,
+                        prompt_text=DEFAULT_PROMPT_TEXT,
                         prompt_wav=str(DEFAULT_VOICE_PATH),
                         stream=False,
                     ):
